@@ -1,7 +1,7 @@
 "use client";
 
 import { FILTER_FIELDS, CATEGORY_LABELS, DEFAULT_EXPANDED_CATEGORIES, type FilterFieldCategory } from "@/lib/types";
-import { getAvailableStrategies, type Strategy } from "@/lib/strategies";
+import { getAvailableStrategies } from "@/lib/strategies";
 import { FilterSection } from "./filter-section";
 import { FilterRangeInput } from "./filter-range-input";
 

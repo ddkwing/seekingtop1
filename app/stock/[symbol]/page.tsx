@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import type { Stock, Market } from "@/lib/types";
@@ -13,14 +13,14 @@ import { ErrorState } from "@/components/ui/error-state";
 export default function StockDetailPage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const symbol = decodeURIComponent(params.symbol as string);
+  const symbol = params.symbol as string;
   const market = (searchParams.get("market") || "cn") as Market;
 
   const [stock, setStock] = useState<Stock | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchStock = async () => {
+  const fetchStock = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -33,11 +33,11 @@ export default function StockDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [symbol, market]);
 
   useEffect(() => {
     fetchStock();
-  }, [symbol, market]);
+  }, [fetchStock]);
 
   if (loading) {
     return (

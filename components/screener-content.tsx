@@ -18,6 +18,7 @@ export function ScreenerContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const market = (searchParams.get("market") || "cn") as Market;
   const activeStrategy = searchParams.get("strategy");
@@ -32,25 +33,37 @@ export function ScreenerContent() {
     }
   });
 
+  const searchParamsString = searchParams.toString();
+
   const fetchStocks = useCallback(async () => {
+    if (abortRef.current) abortRef.current.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams(searchParams.toString());
-      const res = await fetch(`/api/stocks?${params.toString()}`);
+      const res = await fetch(`/api/stocks?${searchParamsString}`, {
+        signal: controller.signal,
+      });
       if (!res.ok) throw new Error("Failed to fetch");
       const data: StockListResponse = await res.json();
       setStocks(data.stocks);
       setTotal(data.total);
-    } catch {
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
       setError("数据加载失败");
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
-  }, [searchParams]);
+  }, [searchParamsString]);
 
   useEffect(() => {
     fetchStocks();
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (abortRef.current) abortRef.current.abort();
+    };
   }, [fetchStocks]);
 
   const updateParams = useCallback(

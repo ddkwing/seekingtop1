@@ -23,7 +23,9 @@ export function parseUrlParams(searchParams: URLSearchParams): {
   limit: number;
   filters: Record<string, [number | null, number | null]>;
 } {
-  const market = searchParams.get("market") || "cn";
+  const VALID_MARKETS = ["cn", "us", "hk"];
+  const rawMarket = searchParams.get("market") || "cn";
+  const market = VALID_MARKETS.includes(rawMarket) ? rawMarket : "cn";
   const strategy = searchParams.get("strategy");
   const sort = searchParams.get("sort");
   const order = (searchParams.get("order") || "asc") as "asc" | "desc";
@@ -38,11 +40,13 @@ export function parseUrlParams(searchParams: URLSearchParams): {
     if (minMatch) {
       const field = minMatch[1];
       if (!filters[field]) filters[field] = [null, null];
-      filters[field][0] = parseFloat(value);
+      const num = parseFloat(value);
+      if (!isNaN(num)) filters[field][0] = num;
     } else if (maxMatch) {
       const field = maxMatch[1];
       if (!filters[field]) filters[field] = [null, null];
-      filters[field][1] = parseFloat(value);
+      const num = parseFloat(value);
+      if (!isNaN(num)) filters[field][1] = num;
     }
   }
 
@@ -79,8 +83,9 @@ export function buildOrderBy(
 ) {
   if (!sortField) return [desc(stocks.marketCap)]; // default: by market cap
 
-  const columnKey = COLUMN_MAP[sortField] || (sortField as keyof typeof stocks);
-  const column = stocks[columnKey as keyof typeof stocks];
+  const columnKey = COLUMN_MAP[sortField];
+  if (!columnKey) return [desc(stocks.marketCap)];
+  const column = stocks[columnKey];
   if (!column) return [desc(stocks.marketCap)];
 
   return [order === "desc" ? desc(column as any) : asc(column as any)];
