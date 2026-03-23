@@ -8,7 +8,7 @@ export function Navbar() {
       </Link>
       <div className="flex gap-6 text-sm">
         <Link
-          href="/"
+          href="/#strategies"
           className="text-gray-600 hover:text-blue-600 transition-colors"
         >
           策略库

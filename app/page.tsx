@@ -15,7 +15,7 @@ export default function HomePage() {
       />
 
       {/* Strategy cards section */}
-      <div className="bg-gray-50 py-16">
+      <div id="strategies" className="bg-gray-50 py-16">
         <div className="max-w-5xl mx-auto px-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
             经典投资策略

@@ -92,7 +92,12 @@ export function ScreenerContent() {
   );
 
   const handleMarketChange = (m: Market) => {
-    updateParams({ market: m }, true);
+    // Clear all filters and strategy when switching markets
+    const clearParams: Record<string, string | null> = {};
+    searchParams.forEach((_, key) => {
+      if (key !== "market") clearParams[key] = null;
+    });
+    updateParams({ ...clearParams, market: m }, true);
   };
 
   const handleFilterChange = (urlParam: string, bound: "min" | "max", value: string) => {
